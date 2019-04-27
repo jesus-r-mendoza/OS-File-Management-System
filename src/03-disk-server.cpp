@@ -5,6 +5,10 @@
 #include <vector>
 using namespace std;
 
+#define CYLINDERS 3
+#define SECTORS 8
+#define BLOCK_SIZE 128
+
 vector<string> split(string str, string regex) {
     int found;
     vector<string> vect;
@@ -18,6 +22,10 @@ vector<string> split(string str, string regex) {
     if ( str.length() > 0 )
         vect.push_back(str);
     return vect;
+}
+
+int blockIndex(int c, int s) {
+    return ( c * SECTORS ) + s;
 }
 
 bool processArgs(vector<string> args) {
