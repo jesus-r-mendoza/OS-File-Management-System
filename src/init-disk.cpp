@@ -10,7 +10,6 @@ using namespace std;
 #define BLOCK_SIZE 128
 
 int main() {
-    
     ofstream disk;
     disk.open("hdd.dsk");
     if ( disk.fail() ) {
