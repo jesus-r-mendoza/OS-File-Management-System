@@ -45,40 +45,100 @@ void info(vector<string> args) {
     }
 }
 
-void read(vector<string> args) {
-    if ( args.size() != 3 ) 
+int read(vector<string> args) {
+    if ( args.size() != 3 ) {
         cout << "ERR: Command \"R\" requires 2 arguments\n\n";
-    else {
-        ifstream disk;
-        disk.open("src/hdd.dsk");
-        if ( disk.fail() ) {
-            cout << "0 - Could not access \"hdd.dsk\"\n\n";
-        }
-        try {
-            int cyl = stoi(args[1]);
-            int sec = stoi(args[2]);
-            if ( !inBounds(cyl, sec) )
-                cout << "0 - Paramters not in bound. Use \"I\" cmd to see disk format.\n\n";
-            else {
-                int index = blockIndex(cyl, sec);
-                string line;
-                for ( int i = 0; i <= index; i++ )
-                    getline(disk, line);
-                cout << "grabbed line: " << line << "\n\n";
-            }
-        } catch (invalid_argument) {
-            cout << "0 - Use integer values\n\n";
-        }
-        disk.clear();
-        disk.close();
+        return 0;
     }
+    ifstream disk;
+    disk.open("src/hdd.dsk");
+    if ( disk.fail() ) {
+        cout << "0 - Could not access \"hdd.dsk\"\n\n";
+        return 0;
+    }
+    int cyl = -1;
+    int sec = -1;
+    try {
+        cyl = stoi(args[1]);
+        sec = stoi(args[2]);
+    } catch (invalid_argument) {
+        cout << "0 - Use integer values\n\n";
+        return 0;
+    }
+    if ( !inBounds(cyl, sec) ) {
+        cout << "0 - Paramters not in bound. Use \"I\" cmd to see disk format.\n\n";
+        return 0;
+    }
+    int index = blockIndex(cyl, sec);
+    string line;
+    for ( int i = 0; i <= index; i++ )
+        getline(disk, line);
+    cout << "1 " << line << "\n\n";
+
+    disk.clear();
+    disk.close();
+    return 1;
 }
 
-void write(vector<string> args) {
-    if ( args.size() != 5 ) 
+int write(vector<string> args) {
+    if ( args.size() != 5 ) {
         cout << "ERR: Command \"W\" requires 4 arguments\n\n";
-    else
-        cout << "Executing: W " << args[1] << " " << args[2] << " " << args[3] << " " << args[4] << "\n\n";
+        return 0;
+    }
+    int cyl = -1;
+    int sec = -1;
+    int len = -1;
+    try {
+        cyl = stoi(args[1]);
+        sec = stoi(args[2]);
+        len = stoi(args[3]);
+    } catch (invalid_argument) {
+        cout << "0 - Use integer values\n\n";
+        return 0;
+    }
+    if ( len != args[4].length() ) {
+        cout << "0 - Data is different length. Expected " << len << " bytes,";
+        cout << " Received " << args[4].length() << " bytes.\n\n";
+        return 0;
+    }
+    if ( !inBounds(cyl, sec) ) {
+        cout << "0 - Paramters not in bound. Use \"I\" cmd to see disk format.\n\n";
+        return 0;
+    }
+    ifstream disk;
+    disk.open("src/hdd.dsk");
+    if ( disk.fail() ) {
+        cout << "0 - Could not access \"hdd.dsk\"\n\n";
+        return 0;
+    }
+    ofstream temp;
+    temp.open("src/.temp.dsk");
+    if ( disk.fail() ) {
+        cout << "0 - Could not access \".temp.dsk\"\n\n";
+        return 0;
+    }
+    int index = blockIndex(cyl, sec);
+    string line;
+    string data = "";
+    data += args[4];
+    for ( int i = 0; i < BLOCK_SIZE - len; i++ )
+        data += '0';
+    for ( int i = 0; i < CYLINDERS * SECTORS; i++ ) {
+        getline(disk, line);
+        if ( i == index )
+            temp << data;
+        else
+            temp << line;
+        temp << "\n";
+    }
+    cout << "1 " << "\n\n";
+    disk.clear();
+    disk.close();
+    temp.clear();
+    temp.close();
+    remove("src/hdd.dsk");
+    rename("src/.temp.dsk", "src/hdd.dsk");
+    return 1;
 }
 
 void help() {
