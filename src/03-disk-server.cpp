@@ -69,7 +69,8 @@ void read(vector<string> args) {
         } catch (invalid_argument) {
             cout << "0 - Use integer values\n\n";
         }
-
+        disk.clear();
+        disk.close();
     }
 }
 
