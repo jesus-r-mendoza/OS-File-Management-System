@@ -29,6 +29,8 @@ int blockIndex(int c, int s) {
 }
 
 bool processArgs(vector<string> args) {
+    if ( args.size() == 0 )
+        return false;
     if ( args[0] == "I" )
         cout << "+--------------+\n| Disk Format: | \n|  3 Cylinders | \n|  8 Sectors   | \n+--------------+\n\n";
     else if ( args[0] == "R" ) {
@@ -51,7 +53,7 @@ bool processArgs(vector<string> args) {
 
 bool prompt() {
     string input;
-    cout << "\nusr@root/ $ ";
+    cout << "usr@root/ $ ";
     getline(cin, input);
     vector<string> arguments = split(input, " ");
     bool quit = processArgs(arguments);
