@@ -113,7 +113,7 @@ int write(vector<string> args) {
     }
     ofstream temp;
     temp.open("src/.temp.dsk");
-    if ( disk.fail() ) {
+    if ( temp.fail() ) {
         cout << "0 - Could not access \".temp.dsk\"\n\n";
         return 0;
     }
