@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <vector>
+#include <fstream>
 using namespace std;
 
 #define CYLINDERS 3
@@ -28,6 +29,10 @@ int blockIndex(int c, int s) {
     return ( c * SECTORS ) + s;
 }
 
+bool inBounds(int c, int s) {
+    return c >= 0 && c < CYLINDERS && s >= 0 && s < SECTORS;
+}
+
 void info(vector<string> args) {
     if ( args.size() != 1 )
         cout << "ERR: Command \"I\" requires 0 arguments\n\n";
@@ -43,8 +48,29 @@ void info(vector<string> args) {
 void read(vector<string> args) {
     if ( args.size() != 3 ) 
         cout << "ERR: Command \"R\" requires 2 arguments\n\n";
-    else
-        cout << "Executing: R " << args[1] << " " << args[2] << "\n\n";    
+    else {
+        ifstream disk;
+        disk.open("src/hdd.dsk");
+        if ( disk.fail() ) {
+            cout << "0 - Could not access \"hdd.dsk\"\n\n";
+        }
+        try {
+            int cyl = stoi(args[1]);
+            int sec = stoi(args[2]);
+            if ( !inBounds(cyl, sec) )
+                cout << "0 - Paramters not in bound. Use \"I\" cmd to see disk format.\n\n";
+            else {
+                int index = blockIndex(cyl, sec);
+                string line;
+                for ( int i = 0; i <= index; i++ )
+                    getline(disk, line);
+                cout << "grabbed line: " << line << "\n\n";
+            }
+        } catch (invalid_argument) {
+            cout << "0 - Use integer values\n\n";
+        }
+
+    }
 }
 
 void write(vector<string> args) {
