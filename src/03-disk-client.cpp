@@ -53,9 +53,10 @@ int main() {
         } else if ( bytesReceived == 0 ) {
 			cout << "\n[ Server disconnected. ]\n\n";
 			return 1;
-		}
-        else
-            cout << string(buf, bytesReceived) << "\n";
+		} else {
+            string response = string(buf, bytesReceived);
+            if ( response != "NULL" ) cout << response;
+        }
         
     } while (true);
 	
