@@ -152,7 +152,6 @@ string processArgs(vector<string> args) {
 }
 
 int getConnection() {
-
     cout << "\n[ Finding new connection... ]\n";
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     if ( sock < 0 ) {
@@ -193,15 +192,14 @@ int getConnection() {
 }
 
 int main() {
-    
     char buf[256];
     int client = -1;
     
     do {
     	if ( client < 0 ) {
-    		client = getConnection();
-    		if ( client < 0 ) continue;
-    		else cout << "\n[ Connected to client. ]\n\n";
+            client = getConnection();
+            if ( client < 0 ) continue;
+            else cout << "\n[ Connected to client. ]\n\n";
     	}
 		
         int bytesReceived = recv(client, buf, 256, 0);
@@ -223,7 +221,7 @@ int main() {
         
         int s = send(client, result.c_str(), result.length(), 0);
         if ( s < 0 )
-        	cout << "ERR: send() failed.\n";
+            cout << "ERR: send() failed.\n";
         else
             cout << "Server Response Successful.\n";
         

@@ -8,11 +8,11 @@
 using namespace std;
 
 int main() {
-	int sock = socket(AF_INET, SOCK_STREAM, 0);
-	if ( sock < 0 ) {
-		cout << "ERR: socket() failed.\n";
-		return 1;
-	}
+    int sock = socket(AF_INET, SOCK_STREAM, 0);
+    if ( sock < 0 ) {
+    	cout << "ERR: socket() failed.\n";
+    	return 1;
+    }
 	
     int port = 49000;
     string ipAddress = "127.0.0.1";
