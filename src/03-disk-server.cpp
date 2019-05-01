@@ -38,7 +38,7 @@ string info(vector<string> args) {
     if ( args.size() != 1 )
         return "ERR: Command \"I\" requires 0 arguments\n\n";
     else {
-        return "+--------------+\n| Disk Format: |\n|  " + to_string(CYLINDERS) + " Cylinders |\n|  " + to_string(SECTORS) + " Sectors   |\n+--------------+\n\n";
+        return "  Disk Format \n     Cylinders: " + to_string(CYLINDERS) + " \n       Sectors: " + to_string(SECTORS) + "\n\n";
     }
 }
 
