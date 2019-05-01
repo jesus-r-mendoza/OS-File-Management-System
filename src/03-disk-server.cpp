@@ -45,16 +45,14 @@ void info(vector<string> args) {
     }
 }
 
-int read(vector<string> args) {
+string read(vector<string> args) {
     if ( args.size() != 3 ) {
-        cout << "ERR: Command \"R\" requires 2 arguments\n\n";
-        return 0;
+        return "[0] ERR: Command \"R\" requires 2 arguments\n\n";
     }
     ifstream disk;
     disk.open("src/hdd.dsk");
     if ( disk.fail() ) {
-        cout << "0 - Could not access \"hdd.dsk\"\n\n";
-        return 0;
+        return "[0] ERR: Could not access \"hdd.dsk\"\n\n";
     }
     int cyl = -1;
     int sec = -1;
@@ -62,28 +60,24 @@ int read(vector<string> args) {
         cyl = stoi(args[1]);
         sec = stoi(args[2]);
     } catch (invalid_argument) {
-        cout << "0 - Use integer values\n\n";
-        return 0;
+        return "[0] ERR: Use integer values\n\n";
     }
     if ( !inBounds(cyl, sec) ) {
-        cout << "0 - Paramters not in bound. Use \"I\" cmd to see disk format.\n\n";
-        return 0;
+        return "[0] ERR: Paramters not in bound. Use \"I\" cmd to see disk format.\n\n";
     }
     int index = blockIndex(cyl, sec);
     string line;
     for ( int i = 0; i <= index; i++ )
         getline(disk, line);
-    cout << "1 " << line << "\n\n";
-
+    
     disk.clear();
     disk.close();
-    return 1;
+    return "[1] " + line + "\n\n";
 }
 
-int write(vector<string> args) {
+string write(vector<string> args) {
     if ( args.size() != 5 ) {
-        cout << "ERR: Command \"W\" requires 4 arguments\n\n";
-        return 0;
+        return "[0] ERR: Command \"W\" requires 4 arguments\n\n";
     }
     int cyl = -1;
     int sec = -1;
@@ -93,17 +87,14 @@ int write(vector<string> args) {
         sec = stoi(args[2]);
         len = stoi(args[3]);
     } catch (invalid_argument) {
-        cout << "0 - Use integer values\n\n";
-        return 0;
+        return "[0] ERR: Use integer values\n\n";
     }
     if ( len != args[4].length() ) {
-        cout << "0 - Data is different length. Expected " << len << " bytes,";
-        cout << " Received " << args[4].length() << " bytes.\n\n";
-        return 0;
+        return "[0] ERR: Data is different length. Expected " + len + " bytes," +
+               " Received " + args[4].length() + " bytes.\n\n";
     }
     if ( !inBounds(cyl, sec) ) {
-        cout << "0 - Paramters not in bound. Use \"I\" cmd to see disk format.\n\n";
-        return 0;
+        return "[0] ERR: Paramters not in bound. Use \"I\" command to see disk format.\n\n";
     }
     ifstream disk;
     disk.open("src/hdd.dsk");
@@ -114,8 +105,7 @@ int write(vector<string> args) {
     ofstream temp;
     temp.open("src/.temp.dsk");
     if ( temp.fail() ) {
-        cout << "0 - Could not access \".temp.dsk\"\n\n";
-        return 0;
+        return "[0] ERR: Could not access \".temp.dsk\"\n\n";
     }
     int index = blockIndex(cyl, sec);
     string line;
@@ -131,37 +121,33 @@ int write(vector<string> args) {
             temp << line;
         temp << "\n";
     }
-    cout << "1 " << "\n\n";
+    
     disk.clear();
     disk.close();
     temp.clear();
     temp.close();
     remove("src/hdd.dsk");
     rename("src/.temp.dsk", "src/hdd.dsk");
-    return 1;
+    return "[1] Data successfully writen.\n\n";
 }
 
-void help() {
-    cout << "You asked for help\n\n";
+string help() {
+    return "You asked for help\n\n";
 }
 
-bool processArgs(vector<string> args) {
+string processArgs(vector<string> args) {
     if ( args.size() == 0 )
-        return false;
+        return NULL;
     if ( args[0] == "I" )
-        info(args);
+        return info(args);
     else if ( args[0] == "R" )
-        read(args);
+        return read(args);
     else if ( args[0] == "W" )
-        write(args);
+        return write(args);
     else if ( args[0] == "help" )
-        help();
-    else if ( args[0] == "exit" ) {
-        cout << "\nExiting...\nBye\n\n";
-        return true;
-    } else
-        cout << "ERR: Command \"" << args[0] << "\" not found. Use command \"help\" for more info.\n\n";
-    return false;
+        return help();
+    else
+        return "ERR: Command \"" + args[0] + "\" not found. Use command \"help\" for more info.\n\n";
 }
 
 bool prompt() {
@@ -173,8 +159,6 @@ bool prompt() {
     return quit;
 }
 
-int main(int argc, char* args[]) {
-    bool quit = false;
-    while ( !quit )
-        quit = prompt();
+int main() {
+    
 }

@@ -31,15 +31,17 @@ int main() {
 	cout << "\n[ Connected to server. ]\n\n";
 
 	char buf[256];
-    string userInput;
+    string input;
     
     do {
-        cout << "> ";
-        getline(cin, userInput);
+        cout << "usr@root/ $ ";
+        getline(cin, input);
         
-        if ( userInput == "exit" ) break;
-		
-        int sendRes = send(sock, userInput.c_str(), userInput.size() + 1, 0);
+        if ( input == "exit" ) {
+            cout << "\nExiting...\nBye\n\n";
+            break;
+        }
+        int sendRes = send(sock, input.c_str(), input.size() + 1, 0);
         if ( sendRes < 0 ) {
             cout << "ERR: send() failed.\n";
             continue;
