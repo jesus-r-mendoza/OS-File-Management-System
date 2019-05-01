@@ -151,24 +151,14 @@ string processArgs(vector<string> args) {
         return "ERR: Command \"" + args[0] + "\" not found. Use command \"help\" for more info.\n\n";
 }
 
-bool prompt() {
-    string input;
-    cout << "usr@root/ $ ";
-    getline(cin, input);
-    vector<string> arguments = split(input, " ");
-    if (arguments.size() == 0) return true;
-    cout << processArgs(arguments);
-    return false;
-}
-
 int getConnection() {
 
-	cout << "\n[ Finding new connection... ]\n";
-	int sock = socket(AF_INET, SOCK_STREAM, 0);
-	if ( sock < 0 ) {
-		cout << "ERR: socket() failed.\n";
-		return -1;
-	}
+    cout << "\n[ Finding new connection... ]\n";
+    int sock = socket(AF_INET, SOCK_STREAM, 0);
+    if ( sock < 0 ) {
+    	cout << "ERR: socket() failed.\n";
+    	return -1;
+    }
 	
     sockaddr_in hint;
     hint.sin_family = AF_INET;
