@@ -25,12 +25,12 @@ int main() {
     int connectRes = connect(sock, (sockaddr*)&hint, sizeof(hint));
     if ( connectRes < 0 ) {
         cout << "Couldn't connect to server.\n";
-		return 1;
-	}
+        return 1;
+    }
 	
-	cout << "\n[ Connected to server. ]\n\n";
+    cout << "\n[ Connected to server. ]\n\n";
 
-	char buf[256];
+    char buf[256];
     string input;
     
     do {
