@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <string.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <vector>
@@ -33,15 +34,11 @@ bool inBounds(int c, int s) {
     return c >= 0 && c < CYLINDERS && s >= 0 && s < SECTORS;
 }
 
-void info(vector<string> args) {
+string info(vector<string> args) {
     if ( args.size() != 1 )
-        cout << "ERR: Command \"I\" requires 0 arguments\n\n";
+        return "ERR: Command \"I\" requires 0 arguments\n\n";
     else {
-        cout << "+--------------+" << endl; 
-        cout << "| Disk Format: |" << endl;
-        cout << "|  " << CYLINDERS << " Cylinders |" << endl;
-        cout << "|  " << SECTORS << " Sectors   |" << endl;
-        cout << "+--------------+" << endl;
+        return "+--------------+\n| Disk Format: |\n|  " + to_string(CYLINDERS) + " Cylinders |\n|  " + to_string(SECTORS) + " Sectors   |\n+--------------+\n\n";
     }
 }
 
@@ -90,8 +87,8 @@ string write(vector<string> args) {
         return "[0] ERR: Use integer values\n\n";
     }
     if ( len != args[4].length() ) {
-        return "[0] ERR: Data is different length. Expected " + len + " bytes," +
-               " Received " + args[4].length() + " bytes.\n\n";
+        return "[0] ERR: Data is different length. Expected " + to_string(len) + " bytes," +
+               " Received " + to_string(args[4].length()) + " bytes.\n\n";
     }
     if ( !inBounds(cyl, sec) ) {
         return "[0] ERR: Paramters not in bound. Use \"I\" command to see disk format.\n\n";
@@ -155,10 +152,13 @@ bool prompt() {
     cout << "usr@root/ $ ";
     getline(cin, input);
     vector<string> arguments = split(input, " ");
-    bool quit = processArgs(arguments);
-    return quit;
+    if (arguments.size() == 0) return true;
+    cout << processArgs(arguments);
+    return false;
 }
 
 int main() {
-    
+    bool quit = false;
+    while ( !quit )
+        quit = prompt();
 }

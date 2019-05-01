@@ -55,7 +55,7 @@ int main() {
 			return 1;
 		}
         else
-            cout << "SERVER> " << string(buf, bytesReceived) << "\n";
+            cout << string(buf, bytesReceived) << "\n";
         
     } while (true);
 	
