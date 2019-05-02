@@ -68,12 +68,22 @@ class Tree {
     Node* current = root;
     string ls() {
         string list = "";
-        if(current->isDir) {
+	if(current->isDir && current->children.size() > 0) {
             for ( Node* child : current->children )
                 list += "  " + (child->name);
-        } else 
-            list = "NULL";
+            cout << "has children\n";
+        }
         return list;
+    }
+    
+    string pwd() {
+        Node* par = current;
+        string path = "" + current->name;
+	while (	par != root && par != NULL ) {
+	    par = current->parent;
+	    path = par->name + path;
+	}
+        return path;
     }
 };
 
@@ -83,6 +93,7 @@ int main() {
     cout << tree.root->isDir << endl;
     cout << tree.current->name << endl;
     cout << tree.ls() << endl;
+    cout << tree.pwd() << endl;
     /*
     cout << "- - - - - - - - - - - -\n";
     Node x;
