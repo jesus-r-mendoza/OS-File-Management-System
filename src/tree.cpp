@@ -25,7 +25,7 @@ class Node {
         name = nombre;
         isDir = isDirectory();
     }
-    Node* parent;
+    Node* parent = NULL;
     string name;
     vector<Node*> children;
     bool isDir;
@@ -95,6 +95,7 @@ class Tree {
     }
     Node* root;
     Node* current = root;
+
     string ls() {
         string list = "";
 	    if(current->isDir && current->children.size() > 0) {
@@ -106,31 +107,43 @@ class Tree {
     
     string pwd() {
         Node* curr = current;
-        Node* par = curr->parent;
         string path = "" + curr->name;
-        while ( par != NULL ) {
-            curr = par;
+        while ( curr != NULL && curr->parent != NULL ) {
+            curr = curr->parent;
             path = curr->name + path;
-            par = curr->parent;
         }
         return path;
     }
 
-    void cd(string child) {
+    string cd(string child) {
         if ( child == ".." ) {
             if ( current->parent != NULL ) 
                 current = current->parent;
+            else
+                return "[0] ERR: Cannot move to a higher directory.\n\n";
         } else {
             Node* c = current->getChild(child);
             if ( c != NULL && c->isDir )
                 current = c;
             if ( c == NULL ) {
                 vector<string> longPath = split(child, "/");
-                if ( longPath.size() > 0 ) {
-                    // dfs
+                if ( longPath.size() > 1 ) {
+                    c = current;
+                    c = c->getChild(longPath[0]+"/");
+                    for ( int i = 1; i < longPath.size(); i++ ) {
+                        if ( c == NULL ) break;
+                        c = c->getChild(longPath[i]+"/");
+                    }
+                    if ( c != NULL && c->isDir )
+                        current = c;                    
                 }
             }
+            if ( c != NULL && !c->isDir )
+                return "[0] ERR: \"" + c->name + "\" is not a valid directory.\n\n";
+            if ( c == NULL )
+                return "[0] ERR: No such directoy \"" + child + "\" exists.\n\n";
         }
+        return "[1] Successfully changed directory.\n\n";
     }
 
     Node* dfs(string node) {
@@ -152,7 +165,7 @@ int main() {
     Node r("root/");
     Node a("a");
     Node b("b/");
-    Node c("c");
+    Node c("c/");
     r.addChild(&a);
     r.addChild(&b);
     r.addChild(&c);
@@ -163,22 +176,45 @@ int main() {
     b.addChild(&b1);
     b.addChild(&b2);
 
+    Node c1("c1");
+    Node c2("c2/");
+    Node c3("c3/");
+    Node c4("c4/");
+
+    c3.addChild(&c4);
+    c2.addChild(&c3);
+
+    c.addChild(&c1);
+    c.addChild(&c2);
+
     Tree tree(&r);
 
     cout << "- - - - DFS - - - - - \n";
     cout << tree.dfs("b2")->name;
     cout << "\n- - - - DFS - - - - - \n";
+    cout << "cd(c/c2/c3/c4) : " << tree.cd("c/c2/c3/c4") << endl;
+    cout << "pwd() : " << tree.pwd() << endl;
 
+    /*
+    cout << "ls() : " << tree.ls() << endl;
+    cout << "cd(b/) : " << tree.cd("b/") << endl;
     cout << "pwd() : " << tree.pwd() << endl;
     cout << "ls() : " << tree.ls() << endl;
-    cout << "cd b/ \n";
-    tree.cd("b/");
+    cout << "cd(b1/) : " << tree.cd("b1/") << endl;
+    cout << "cd(..) : " << tree.cd("..") << endl;
+    cout << "cd(b1/) : " << tree.cd("b1/") << endl;
     cout << "pwd() : " << tree.pwd() << endl;
-    cout << "ls() : " << tree.ls() << endl;
-    tree.cd("b1/");
-    tree.cd("..");
-    tree.cd("b2");
-    //cout << "ls() : " << tree.pwd() << endl;
+    cout << "cd(c/c2/c3) : " << tree.cd("c/c2/c3/") << endl;
+    cout << tree.pwd() << endl;
+    cout << "cd(..) : " << tree.cd("..") << endl;
+    cout << "cd(..) : " << tree.cd("..") << endl;
+    cout << tree.pwd() << endl;
+    //cout << "cd(c/c1) : " << tree.cd("c/c1") << endl;
+    cout << tree.pwd() << endl;
+
+    */
+
+
     /*
     cout << tree.root->isDir << endl;
     cout << tree.current->name << endl;
