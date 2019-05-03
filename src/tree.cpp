@@ -4,6 +4,21 @@
 #include <iostream>
 using namespace std;
 
+vector<string> split(string str, string regex) {
+    int found;
+    vector<string> vect;
+    string segment;
+    while ( ( found = str.find(regex) ) != -1 ) {
+        segment = str.substr(0, found);
+        str.erase(0, found + regex.length());
+        if ( segment != " " && segment.length() > 0 )
+            vect.push_back(segment);
+    }
+    if ( str.length() > 0 )
+        vect.push_back(str);
+    return vect;
+}
+
 class Node {
     public:
     Node(string nombre) {
@@ -25,7 +40,7 @@ class Node {
         children.push_back(child);
         return true;
     }
-    
+
     bool delChild(Node* child) {
         if ( child == NULL )
             return false;
@@ -54,6 +69,21 @@ class Node {
 
     bool isDirectory() {
         return name[name.length()-1] == '/';
+    }
+
+    Node* dfsHelper(string node) {
+        cout << "searching child " << name << endl;;
+        if ( name == node ) {
+            cout << "FOUND\n";
+            return this;
+        }
+        for ( Node* c : children ) {
+            cout << "searching child of child " << c->name << endl;
+            Node* temp = c->dfsHelper(node);
+            if ( temp != NULL )
+                return temp;
+        }
+        return NULL;
     }
 };
 
@@ -94,8 +124,28 @@ class Tree {
             Node* c = current->getChild(child);
             if ( c != NULL && c->isDir )
                 current = c;
+            if ( c == NULL ) {
+                vector<string> longPath = split(child, "/");
+                if ( longPath.size() > 0 ) {
+                    // dfs
+                }
+            }
         }
     }
+
+    Node* dfs(string node) {
+        if ( root->name == node )
+            return root;
+        for ( Node* child : root->children ) {
+            if ( child->name == node ) 
+                return child;
+            Node* temp = child->dfsHelper(node);
+            if ( temp != NULL )
+                return temp;
+        }
+        return NULL;
+    }
+    
 };
 
 int main() {
@@ -114,6 +164,11 @@ int main() {
     b.addChild(&b2);
 
     Tree tree(&r);
+
+    cout << "- - - - DFS - - - - - \n";
+    cout << tree.dfs("b2")->name;
+    cout << "\n- - - - DFS - - - - - \n";
+
     cout << "pwd() : " << tree.pwd() << endl;
     cout << "ls() : " << tree.ls() << endl;
     cout << "cd b/ \n";
