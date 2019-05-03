@@ -118,7 +118,7 @@ class Tree {
             if ( current->parent != NULL )
                 current = current->parent;
             else
-                return "[0] ERR: Cannot move to a higher directory.\n\n";
+                return "[0] ERR: Cannot move to a higher directory.\nUsage: $ cd dirname/\n\n";
         } else if ( child == "~" || child == "root/" || child == "root" ) {
             current = root; 
         } else {
@@ -139,11 +139,36 @@ class Tree {
                 }
             }
             if ( c != NULL && !c->isDir )
-                return "[0] ERR: \"" + c->name + "\" is not a valid directory.\n\n";
+                return "[0] ERR: \"" + c->name + "\" is not a valid directory.\nUsage: $ cd dirname/\n";
             if ( c == NULL )
-                return "[0] ERR: No such directoy \"" + child + "\" exists.\n\n";
+                return "[0] ERR: No such directoy \"" + child + "\" exists.\nUsage: $ cd dirname/\n\n";
         }
         return "[1] Successfully changed directory.\n\n";
+    }
+
+    string mkdir(string subdir) {
+        if ( subdir.length() <= 0 || subdir[subdir.length()-1] != '/' )
+            return "[0] ERR: \"" + subdir + "\" is not a valid directory name.\nUsage: $ mkdir dirname/\n\n";
+        vector<string> longPath = split(subdir, "/");
+        int result;
+        if ( longPath.size() == 1 ) {
+            Node*  dir = new Node(subdir);
+            result = current->addChild(dir);
+            if ( result == -2 )
+                return "[0] ERR: Couldn't create directory.\nUsage: $ mkdir dirname/\n\n";
+            else if ( result == -1 )
+                return "[0] ERR: Directory already exits.\nUsage: $ mkdir dirname/\n\n";
+            return "[1] Successfully created directory.\n\n";
+        }
+        string dir = "";
+        for ( int i = 0; i < longPath.size()-1; i++ )
+            dir += longPath[i] + '/';
+        string res = cd(dir);
+        cout << "res: " << res << "dir: " << dir << endl;
+        if ( res[1] == '1' )
+            return mkdir(longPath[longPath.size()-1] + '/');
+        else
+            return "[0] ERR: Couldn't create directory \"" + subdir + "\".\nUsage: $ mkdir dirname/";
     }
 
     Node* dfs(string node) {
@@ -188,12 +213,15 @@ int main() {
     c.addChild(&c2);
 
     Tree tree(&r);
-
+    /*
     cout << "cd(b/b1/) : " << tree.cd("b/b1/") << endl;
     cout << "pwd() : " << tree.pwd() << endl;
     cout << tree.ls() << endl;
-    tree.root->delChild(&b);
+    //tree.root->delChild(&b);
     cout << "cd(root/) : " << tree.cd("root/") << endl;
     cout << tree.ls() << endl;
-    cout << "cd(b/b1/) : " << tree.cd("b/b1/") << endl;
+    cout << "\n\n\ncd(b/b2/) : " << tree.cd("b/b2/") << endl;
+    cout << "mkdir(b/b2/b3/) : " << tree.mkdir("b/b2/b3/") << endl;
+    cout << tree.ls() << endl;
+    */
 }
