@@ -40,7 +40,7 @@ class Node {
         children.push_back(child);
         return true;
     }
-
+    
     bool delChild(Node* child) {
         if ( child == NULL )
             return false;
@@ -72,13 +72,9 @@ class Node {
     }
 
     Node* dfsHelper(string node) {
-        cout << "searching child " << name << endl;;
-        if ( name == node ) {
-            cout << "FOUND\n";
+        if ( name == node ) 
             return this;
-        }
         for ( Node* c : children ) {
-            cout << "searching child of child " << c->name << endl;
             Node* temp = c->dfsHelper(node);
             if ( temp != NULL )
                 return temp;
@@ -194,49 +190,4 @@ int main() {
     cout << "\n- - - - DFS - - - - - \n";
     cout << "cd(c/c2/c3/c4) : " << tree.cd("c/c2/c3/c4") << endl;
     cout << "pwd() : " << tree.pwd() << endl;
-
-    /*
-    cout << "ls() : " << tree.ls() << endl;
-    cout << "cd(b/) : " << tree.cd("b/") << endl;
-    cout << "pwd() : " << tree.pwd() << endl;
-    cout << "ls() : " << tree.ls() << endl;
-    cout << "cd(b1/) : " << tree.cd("b1/") << endl;
-    cout << "cd(..) : " << tree.cd("..") << endl;
-    cout << "cd(b1/) : " << tree.cd("b1/") << endl;
-    cout << "pwd() : " << tree.pwd() << endl;
-    cout << "cd(c/c2/c3) : " << tree.cd("c/c2/c3/") << endl;
-    cout << tree.pwd() << endl;
-    cout << "cd(..) : " << tree.cd("..") << endl;
-    cout << "cd(..) : " << tree.cd("..") << endl;
-    cout << tree.pwd() << endl;
-    //cout << "cd(c/c1) : " << tree.cd("c/c1") << endl;
-    cout << tree.pwd() << endl;
-
-    */
-
-
-    /*
-    cout << tree.root->isDir << endl;
-    cout << tree.current->name << endl;
-    cout << tree.ls() << endl;
-    cout << tree.pwd() << endl;
-    */
-
-
-    /*
-    cout << "- - - - - - - - - - - -\n";
-    Node x;
-    x.name = "x";
-    Node y;
-    y.name = "y";
-    cout << x.addChild(&y) << endl;
-    cout << x.addChild(&y) << endl;
-    cout << "- - - x's children\n";
-    for ( int i = 0; i < x.children.size(); i++ )
-        cout << x.children[i]->name << endl;
-    x.delChild(&y);
-    for ( int i = 0; i < x.children.size(); i++ )
-        cout << x.children[i]->name << endl;
-    */
-    
 }
