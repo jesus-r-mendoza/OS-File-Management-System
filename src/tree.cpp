@@ -95,10 +95,10 @@ class Tree {
     Node* current = root;
 
     string ls() {
-        string list = "";
+        string list = "   ";
 	    if(current->isDir && current->children.size() > 0) {
             for ( Node* child : current->children )
-                list += "  " + (child->name);
+                list += (child->name) + "   \t";
         }
         return list;
     }
@@ -119,6 +119,8 @@ class Tree {
                 current = current->parent;
             else
                 return "[0] ERR: Cannot move to a higher directory.\n\n";
+        } else if ( child == "~" || child == "root/" || child == "root" ) {
+            current = root; 
         } else {
             Node* c = current->getChild(child);
             if ( c != NULL && c->isDir )
@@ -187,9 +189,11 @@ int main() {
 
     Tree tree(&r);
 
-    //cout << "cd(c/c2/c3/c4) : " << tree.cd("c/c2/c3/c4") << endl;
+    cout << "cd(b/b1/) : " << tree.cd("b/b1/") << endl;
     cout << "pwd() : " << tree.pwd() << endl;
     cout << tree.ls() << endl;
     tree.root->delChild(&b);
+    cout << "cd(root/) : " << tree.cd("root/") << endl;
     cout << tree.ls() << endl;
+    cout << "cd(b/b1/) : " << tree.cd("b/b1/") << endl;
 }
