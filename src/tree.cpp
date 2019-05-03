@@ -29,32 +29,34 @@ class Node {
     string name;
     vector<Node*> children;
     bool isDir;
-    bool addChild(Node* child) {
+    
+    int addChild(Node* child) {
         if ( child == NULL )
-            return false;
+            return -2;
         for ( Node* x : children ) {
             if ( x->name == child->name )
-                return false;
+                return -1;
         }
         child->parent = this;
         children.push_back(child);
-        return true;
+        return 0;
     }
-    
-    bool delChild(Node* child) {
+
+    int delChild(Node* child) {
         if ( child == NULL )
-            return false;
+            return -2;
         int i = 0;
         int d = -1;
         for ( Node* x : children ) {
             if ( x->name == child->name )
-                d = i++;
+                d = i;
+            i++;
         }
-        if ( ! (d < 0) ) {
+        if ( !(d < 0) ) {
             children.erase(children.begin()+d);
-            return true;
+            return 0;
         }
-        return false;
+        return -1;
     }
 
     Node* getChild(string child) {
@@ -113,7 +115,7 @@ class Tree {
 
     string cd(string child) {
         if ( child == ".." ) {
-            if ( current->parent != NULL ) 
+            if ( current->parent != NULL )
                 current = current->parent;
             else
                 return "[0] ERR: Cannot move to a higher directory.\n\n";
@@ -185,9 +187,9 @@ int main() {
 
     Tree tree(&r);
 
-    cout << "- - - - DFS - - - - - \n";
-    cout << tree.dfs("b2")->name;
-    cout << "\n- - - - DFS - - - - - \n";
-    cout << "cd(c/c2/c3/c4) : " << tree.cd("c/c2/c3/c4") << endl;
+    //cout << "cd(c/c2/c3/c4) : " << tree.cd("c/c2/c3/c4") << endl;
     cout << "pwd() : " << tree.pwd() << endl;
+    cout << tree.ls() << endl;
+    tree.root->delChild(&b);
+    cout << tree.ls() << endl;
 }
