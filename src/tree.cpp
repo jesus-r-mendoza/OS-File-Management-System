@@ -95,11 +95,13 @@ class Tree {
     Node* current = root;
 
     string ls() {
-        string list = "   ";
+        string list = "";
 	    if(current->isDir && current->children.size() > 0) {
+            list = "   ";
             for ( Node* child : current->children )
                 list += (child->name) + "   \t";
         }
+        list += '\n';
         return list;
     }
     
@@ -210,6 +212,31 @@ class Tree {
     
 };
 
+string parse(Tree* tree, string input) {
+    vector<string> args = split(input, " ");
+    if ( args.size() <= 0 )
+        return "\n";
+    if ( args[0] == "pwd" )
+        return tree->pwd() + "\n";
+    else if ( args[0] == "ls" )
+        return tree->ls();
+    else if ( args[0] == "cd" )
+        return tree->cd(args[1]);
+    else if ( args[0] == "mkdir" )
+        return tree->mkdir(args[1]);
+    else if ( args[0] == "rmdir" )
+        return tree->rmdir(args[1]);
+    else
+        return "[0] ERR: Command not recognized.\n\n";
+}
+
+void prompt(Tree* tree) {
+    cout << "user @ " << tree->pwd() << " $ ";
+    string input;
+    getline(cin, input);   
+    cout << parse(tree, input);
+}
+
 int main() {
     Node r("root/");
     Node a("a");
@@ -238,21 +265,7 @@ int main() {
 
     Tree tree(&r);
 
-    cout << tree.ls() << endl;
-    cout << tree.rmdir("b/b1/");
-    cout << tree.ls() << endl;
-    cout << tree.cd("b1/") << endl;
-    cout << tree.ls() << endl;
+    while(true)
+        prompt(&tree);
 
-    /*
-    cout << "cd(b/b1/) : " << tree.cd("b/b1/") << endl;
-    cout << "pwd() : " << tree.pwd() << endl;
-    cout << tree.ls() << endl;
-    //tree.root->delChild(&b);
-    cout << "cd(root/) : " << tree.cd("root/") << endl;
-    cout << tree.ls() << endl;
-    cout << "\n\n\ncd(b/b2/) : " << tree.cd("b/b2/") << endl;
-    cout << "mkdir(b/b2/b3/) : " << tree.mkdir("b/b2/b3/") << endl;
-    cout << tree.ls() << endl;
-    */
 }
