@@ -152,7 +152,7 @@ class Tree {
         vector<string> longPath = split(subdir, "/");
         int result;
         if ( longPath.size() == 1 ) {
-            Node*  dir = new Node(subdir);
+            Node* dir = new Node(longPath[0]+'/');
             result = current->addChild(dir);
             if ( result == -2 )
                 return "[0] ERR: Couldn't create directory.\nUsage: $ mkdir dirname/\n\n";
@@ -164,11 +164,35 @@ class Tree {
         for ( int i = 0; i < longPath.size()-1; i++ )
             dir += longPath[i] + '/';
         string res = cd(dir);
-        cout << "res: " << res << "dir: " << dir << endl;
         if ( res[1] == '1' )
             return mkdir(longPath[longPath.size()-1] + '/');
         else
             return "[0] ERR: Couldn't create directory \"" + subdir + "\".\nUsage: $ mkdir dirname/";
+    }
+
+    string rmdir(string subdir) {
+        if ( subdir.length() <= 0 || subdir[subdir.length()-1] != '/' )
+            return "[0] ERR: \"" + subdir + "\" is not a valid directory name.\nUsage: $ rmdir dirname/\n\n";
+        vector<string> longPath = split(subdir, "/");
+        int result;
+        if ( longPath.size() == 1 ) {
+            Node dir(longPath[0]+'/');
+            result = current->delChild(&dir);
+            if ( result == -2 )
+                return "[0] ERR: Couldn't delete directory.\nUsage: $ rmdir dirname/\n\n";
+            else if ( result == -1 )
+                return "[0] ERR: Directory \"" + subdir + "\" doesn't exits.\nUsage: $ rmdir dirname/\n\n";
+            return "[1] Successfully deleted directory.\n\n";
+        }
+        string dir = "";
+        for ( int i = 0; i < longPath.size()-1; i++ )
+            dir += longPath[i] + '/';
+        string res = cd(dir);
+        cout << "res: " << res << "dir: " << dir << endl;
+        if ( res[1] == '1' )
+            return rmdir(longPath[longPath.size()-1] + '/');
+        else
+            return "[0] ERR: Couldn't delete directory \"" + subdir + "\".\nUsage: $ rmdir dirname/";
     }
 
     Node* dfs(string node) {
@@ -213,6 +237,13 @@ int main() {
     c.addChild(&c2);
 
     Tree tree(&r);
+
+    cout << tree.ls() << endl;
+    cout << tree.rmdir("b/b1/");
+    cout << tree.ls() << endl;
+    cout << tree.cd("b1/") << endl;
+    cout << tree.ls() << endl;
+
     /*
     cout << "cd(b/b1/) : " << tree.cd("b/b1/") << endl;
     cout << "pwd() : " << tree.pwd() << endl;
