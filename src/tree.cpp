@@ -106,7 +106,8 @@ class Node {
 
     string saveSubtree() {
         string content = "";
-        content += to_string(parent->id) + ',' + name + ',' + to_string(id) + ',' + to_string(isDir) + ',' + to_string(cyl) + ',' + to_string(sec) + '\n';
+        // par id, name, id, cyl, sec
+        content += to_string(parent->id) + ',' + name + ',' + to_string(id) + ','  + to_string(cyl) + ',' + to_string(sec) + '\n';
         for ( Node* child : children )
             content += child->saveSubtree(); 
         return content;       
@@ -288,8 +289,7 @@ class Tree {
         if ( tree.fail() ) {
             return "[0] ERR: Could not access \"tree.dsk\"\n\n";
         }
-        // par id, name, id, isdir, cyl, sec
-        tree << root->name<<','<<root->id<<','<<root->isDir<<','<<root->cyl<<','<<root->sec<<'\n';
+        tree << root->name<<','<<root->id<<','<<root->cyl<<','<<root->sec<<'\n';
         string data = "";
         for ( Node* child : root->children )
             data += child->saveSubtree();
@@ -299,8 +299,44 @@ class Tree {
         return "[1] Tree structure saved successfully.";
     }
 
-    
 };
+
+Tree* load() {
+    ifstream file;
+    file.open("tree.dsk");
+    if ( file.fail() ) {
+        cout << "[0] ERR: Could not access \"tree.dsk\"\n\n";
+        return NULL;
+    }
+    string line;
+    getline(file, line); // root node;
+
+    vector<string> parts = split(line, ",");
+    Node* root = new Node(parts[0]);
+    root->id = stoi(parts[1]);
+    root->cyl = stoi(parts[2]);
+    root->sec = stoi(parts[3]);
+    Tree* tree = new Tree(root);
+
+    while( getline(file, line) ) {
+        parts = split(line, ",");
+        if ( parts.size() != 5 ) {
+            cout << "[0] ERR: Invalid record, node discarded.\n";
+            continue;  // discard any invalid records
+        }
+        Node* par = tree->dfsID(stoi(parts[0]));
+        if ( par == NULL ) {
+            cout << "[0] ERR: Child's parent not found, node discarded.\n";
+            continue;
+        }
+        Node* child = new Node(parts[1]);
+        child->id = stoi(parts[2]);
+        child->cyl = stoi(parts[3]);
+        child->sec = stoi(parts[4]);
+        par->addChild(child);
+    }
+    return tree;
+}
 
 string parse(Tree* tree, string input) {
     vector<string> args = split(input, " ");
@@ -328,37 +364,10 @@ void prompt(Tree* tree) {
 }
 
 int main() {
-    Node r("root/");
-    Node a("a");
-    Node b("b/");
-    Node c("c/");
-    r.addChild(&a);
-    r.addChild(&b);
-    r.addChild(&c);
 
-    Node b1("b1/");
-    Node b2("b2");
-
-    b.addChild(&b1);
-    b.addChild(&b2);
-
-    Node c1("c1");
-    Node c2("c2/");
-    Node c3("c3/");
-    Node c4("c4/");
-
-    c3.addChild(&c4);
-    c2.addChild(&c3);
-
-    c.addChild(&c1);
-    c.addChild(&c2);
-
-
-    Tree tree(&r);
-    
-    cout << tree.save() << endl;
+    Tree* tree = load();
 
     while(true)
-        prompt(&tree);
+        prompt(tree);
 
 }
