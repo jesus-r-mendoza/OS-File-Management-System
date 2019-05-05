@@ -51,9 +51,9 @@ string read(vector<string> args) {
         return "[0] ERR: Command \"R\" requires 2 arguments\n\n";
     }
     ifstream disk;
-    disk.open("src/hdd.dsk");
+    disk.open("storage/hdd.dsk");
     if ( disk.fail() ) {
-        return "[0] ERR: Could not access \"hdd.dsk\"\n\n";
+        return "[0] ERR: Could not access \"storage/hdd.dsk\"\n\n";
     }
     int cyl = -1;
     int sec = -1;
@@ -98,15 +98,15 @@ string write(vector<string> args) {
         return "[0] ERR: Paramters not in bound. Use \"I\" command to see disk format.\n\n";
     }
     ifstream disk;
-    disk.open("src/hdd.dsk");
+    disk.open("storage/hdd.dsk");
     if ( disk.fail() ) {
-        cout << "0 - Could not access \"hdd.dsk\"\n\n";
+        cout << "0 - Could not access \"storage/hdd.dsk\"\n\n";
         return 0;
     }
     ofstream temp;
-    temp.open("src/.temp.dsk");
+    temp.open("storage/.temp.dsk");
     if ( temp.fail() ) {
-        return "[0] ERR: Could not access \".temp.dsk\"\n\n";
+        return "[0] ERR: Could not access \"storage/.temp.dsk\"\n\n";
     }
     int index = blockIndex(cyl, sec);
     string line;
@@ -127,8 +127,8 @@ string write(vector<string> args) {
     disk.close();
     temp.clear();
     temp.close();
-    remove("src/hdd.dsk");
-    rename("src/.temp.dsk", "src/hdd.dsk");
+    remove("storage/hdd.dsk");
+    rename("storage/.temp.dsk", "storage/hdd.dsk");
     return "[1] Data successfully writen.\n\n";
 }
 

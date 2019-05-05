@@ -285,9 +285,9 @@ class Tree {
 
     string save() {
         ofstream tree;
-        tree.open("tree.dsk");
+        tree.open("storage/tree.dsk");
         if ( tree.fail() ) {
-            return "[0] ERR: Could not access \"tree.dsk\"\n\n";
+            return "[0] ERR: Could not access \"storage/tree.dsk\"\n\n";
         }
         tree << root->name<<','<<root->id<<','<<root->cyl<<','<<root->sec<<'\n';
         string data = "";
@@ -303,9 +303,9 @@ class Tree {
 
 Tree* load() {
     ifstream file;
-    file.open("tree.dsk");
+    file.open("storage/tree.dsk");
     if ( file.fail() ) {
-        cout << "[0] ERR: Could not access \"tree.dsk\"\n\n";
+        cout << "[0] ERR: Could not access \"storage/tree.dsk\"\n\n";
         return NULL;
     }
     string line;
