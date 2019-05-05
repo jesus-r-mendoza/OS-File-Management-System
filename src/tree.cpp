@@ -211,6 +211,35 @@ class Tree {
         return NULL;
     }
     
+    string lsArgs(vector<string> args) {
+        if ( args.size() != 1 )
+            return "[0] ERR: Command\"ls\" requires 0 arguments.\n\n";
+        return ls();
+    }
+
+    string pwdArgs(vector<string> args) {
+        if ( args.size() != 1 )
+            return "[0] ERR: Command \"pwd\" requires 0 arguments.";
+        return pwd();
+    }
+
+    string cdArgs(vector<string> args) {
+        if ( args.size() != 2 )
+            return "[0] ERR: Command \"cd\" requires 1 argument.\nUsage: $ cd dirname/\n\n";
+        return cd(args[1]);
+    }
+
+    string mkdirArgs(vector<string> args) {
+        if ( args.size() != 2 )
+            return "[0] ERR: Command \"mkdir\" requires 1 argument.\nUsage: $ mkdir dirname/\n\n";
+        return mkdir(args[1]);
+    }
+
+    string rmdirArgs(vector<string> args) {
+        if ( args.size() != 2 )
+            return "[0] ERR: Command \"rmdir\" requires 1 argument.\nUsage: $ rmdir dirname/\n\n";
+        return rmdir(args[1]);
+    }
 };
 
 string parse(Tree* tree, string input) {
@@ -218,15 +247,15 @@ string parse(Tree* tree, string input) {
     if ( args.size() <= 0 )
         return "";
     if ( args[0] == "pwd" )
-        return tree->pwd() + "\n\n";
+        return tree->pwdArgs(args) + "\n\n";
     else if ( args[0] == "ls" )
-        return tree->ls();
+        return tree->lsArgs(args);
     else if ( args[0] == "cd" )
-        return tree->cd(args[1]);
+        return tree->cdArgs(args);
     else if ( args[0] == "mkdir" )
-        return tree->mkdir(args[1]);
+        return tree->mkdirArgs(args);
     else if ( args[0] == "rmdir" )
-        return tree->rmdir(args[1]);
+        return tree->rmdirArgs(args);
     else
         return "[0] ERR: Command \"" + input + "\" not recognized.\n\n";
 }
