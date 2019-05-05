@@ -100,6 +100,7 @@ class Tree {
             list = "   ";
             for ( Node* child : current->children )
                 list += (child->name) + "   \t";
+            list += '\n';
         }
         list += '\n';
         return list;
@@ -215,9 +216,9 @@ class Tree {
 string parse(Tree* tree, string input) {
     vector<string> args = split(input, " ");
     if ( args.size() <= 0 )
-        return "\n";
+        return "";
     if ( args[0] == "pwd" )
-        return tree->pwd() + "\n";
+        return tree->pwd() + "\n\n";
     else if ( args[0] == "ls" )
         return tree->ls();
     else if ( args[0] == "cd" )
@@ -227,7 +228,7 @@ string parse(Tree* tree, string input) {
     else if ( args[0] == "rmdir" )
         return tree->rmdir(args[1]);
     else
-        return "[0] ERR: Command not recognized.\n\n";
+        return "[0] ERR: Command \"" + input + "\" not recognized.\n\n";
 }
 
 void prompt(Tree* tree) {
