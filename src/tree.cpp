@@ -2,7 +2,12 @@
 #include <string>
 #include <string.h>
 #include <iostream>
+#include <fstream>
+#include <stdio.h>
+#include <unistd.h>
 using namespace std;
+
+int count = 0;
 
 vector<string> split(string str, string regex) {
     int found;
@@ -24,11 +29,15 @@ class Node {
     Node(string nombre) {
         name = nombre;
         isDir = isDirectory();
+        id = count++;
     }
+    int id = -1;
     Node* parent = NULL;
     string name;
     vector<Node*> children;
     bool isDir;
+    int cyl = -1;
+    int sec = -1;
     
     int addChild(Node* child) {
         if ( child == NULL )
@@ -82,6 +91,25 @@ class Node {
                 return temp;
         }
         return NULL;
+    }
+
+    Node* dfsHelperID(int node) {
+        if ( id == node ) 
+            return this;
+        for ( Node* c : children ) {
+            Node* temp = c->dfsHelperID(node);
+            if ( temp != NULL )
+                return temp;
+        }
+        return NULL;
+    }
+
+    string saveSubtree() {
+        string content = "";
+        content += to_string(parent->id) + ',' + name + ',' + to_string(id) + ',' + to_string(isDir) + ',' + to_string(cyl) + ',' + to_string(sec) + '\n';
+        for ( Node* child : children )
+            content += child->saveSubtree(); 
+        return content;       
     }
 };
 
@@ -210,6 +238,19 @@ class Tree {
         }
         return NULL;
     }
+
+    Node* dfsID(int node) {
+        if ( root->id == node )
+            return root;
+        for ( Node* child : root->children ) {
+            if ( child->id == node ) 
+                return child;
+            Node* temp = child->dfsHelperID(node);
+            if ( temp != NULL )
+                return temp;
+        }
+        return NULL;
+    }
     
     string lsArgs(vector<string> args) {
         if ( args.size() != 1 )
@@ -240,6 +281,25 @@ class Tree {
             return "[0] ERR: Command \"rmdir\" requires 1 argument.\nUsage: $ rmdir dirname/\n\n";
         return rmdir(args[1]);
     }
+
+    string save() {
+        ofstream tree;
+        tree.open("tree.dsk");
+        if ( tree.fail() ) {
+            return "[0] ERR: Could not access \"tree.dsk\"\n\n";
+        }
+        // par id, name, id, isdir, cyl, sec
+        tree << root->name<<','<<root->id<<','<<root->isDir<<','<<root->cyl<<','<<root->sec<<'\n';
+        string data = "";
+        for ( Node* child : root->children )
+            data += child->saveSubtree();
+        tree << data;
+        tree.clear();
+        tree.close();
+        return "[1] Tree structure saved successfully.";
+    }
+
+    
 };
 
 string parse(Tree* tree, string input) {
@@ -293,7 +353,10 @@ int main() {
     c.addChild(&c1);
     c.addChild(&c2);
 
+
     Tree tree(&r);
+    
+    cout << tree.save() << endl;
 
     while(true)
         prompt(&tree);
