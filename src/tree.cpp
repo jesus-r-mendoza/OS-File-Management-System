@@ -338,8 +338,7 @@ Tree* load() {
     return tree;
 }
 
-string parse(Tree* tree, string input) {
-    vector<string> args = split(input, " ");
+string parse(Tree* tree, vector<string> args) {    
     if ( args.size() <= 0 )
         return "";
     if ( args[0] == "pwd" )
@@ -353,21 +352,27 @@ string parse(Tree* tree, string input) {
     else if ( args[0] == "rmdir" )
         return tree->rmdirArgs(args);
     else
-        return "[0] ERR: Command \"" + input + "\" not recognized.\n\n";
+        return "[0] ERR: Command \"" + args[0] + "\" not recognized.\n\n";
 }
 
-void prompt(Tree* tree) {
+bool prompt(Tree* tree) {
     cout << "user @ " << tree->pwd() << " $ ";
     string input;
-    getline(cin, input);   
-    cout << parse(tree, input);
+    getline(cin, input);
+    vector<string> args = split(input, " ");
+    if ( args.size() > 0 && args[0] == "exit" ) {
+        tree->save();
+        return true;
+    }
+    cout << parse(tree, args);
+    return false;
 }
 
 int main() {
 
     Tree* tree = load();
-
-    while(true)
-        prompt(tree);
+    bool quit = false;
+    while(!quit)
+        quit = prompt(tree);
 
 }
