@@ -194,11 +194,19 @@ int getConnection() {
 int main() {
     char buf[256];
     int client = -1;
-    
+    int fails = 0;
     do {
+        if ( fails > 15 ) {
+            cout << "\nToo many connection fails. Terminating.\n\n";
+            break;
+        }
+
     	if ( client < 0 ) {
             client = getConnection();
-            if ( client < 0 ) continue;
+            if ( client < 0 ) {
+                fails++;
+                continue;
+            }
             else cout << "\n[ Connected to client. ]\n\n";
     	}
 		

@@ -277,7 +277,7 @@ string deleteFile(int fileID) {
 
 string list(string flag) {
     if ( flag != "0" && flag != "1" )
-        return "[0] ERR: Unrecognized flag.\n\n";
+        return "[0] ERR: Unrecognized flag \"" + flag + "\".\n\n";
     ifstream fat;
     fat.open("storage/fat.dsk");
     if ( fat.fail() ) {
@@ -317,11 +317,19 @@ int main() {
         cout << "Failed to connect to server.\n\n";
         return -1;
     }
-
+    int fails = 0;
     do {
+        if ( fails > 15 ) {
+            cout << "\nToo many connection fails. Terminating.\n\n";
+            break;
+        }
+
         if ( fileServerSocket < 0 ) {
             fileServerSocket = getConnection();
-            if ( fileServerSocket < 0 ) continue;
+            if ( fileServerSocket < 0 ) {
+                fails++;
+                continue;
+            }
             else cout << "\n[ Connected to client. ]\n\n";
     	}
 		

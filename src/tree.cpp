@@ -299,6 +299,12 @@ class Tree {
             return "[0] ERR: Couldn't create file \"" + fileName + "\".\nUsage: $ touch filename";
     }
 
+    string allFilesArgs(vector<string> args) {
+        if ( args.size() != 2 )
+            return "[0] ERR: Command \"L\" requires 1 arguments.\n\n";
+        return sendAndRecv("L " + args[1]);
+    }
+
     Node* dfs(string node) {
         if ( root->name == node )
             return root;
@@ -346,7 +352,8 @@ class Tree {
     string mkdirArgs(vector<string> args) {
         if ( args.size() != 2 )
             return "[0] ERR: Command \"mkdir\" requires 1 argument.\nUsage: $ mkdir dirname/\n\n";
-        if ( args[1].find(",") > 0 )
+        int a = args[1].find(",");
+        if ( a != -1 )
             return "[0] ERR: \"" + args[1] + "\" is not a valid directory name.\nUsage: $ mkdir dirname/\n\n";
         return mkdir(args[1]);
     }
@@ -359,9 +366,11 @@ class Tree {
 
     string touchArgs(vector<string> args) {        
         if ( args.size() != 2 )
-            return "[0] ERR: Command \"mkdir\" requires 1 argument.\nUsage: $ touch filename\nUsage: $ touch filename\n\n";
-        if ( args[1].find(",") > 0 || args[1].find("/") > 0)
-            return "[0] ERR: \"" + args[1] + "\" is not a valid file name.\n\n";
+            return "[0] ERR: Command \"touch\" requires 1 argument.\nUsage: $ touch filename\nUsage: $ touch filename\n\n";
+        int a = args[1].find(",");
+        int b = args[1].find("/");
+        if ( a != -1 || b != -1)
+            return "[0] ERR: \"" + args[1] + "\" is not a valid file name.\nUsage: $ touch filename\nUsage: $ touch filename\n\n";
         return touch(args[1]);
     }
 
@@ -435,6 +444,8 @@ string parse(Tree* tree, vector<string> args) {
         return tree->rmdirArgs(args);
     else if ( args[0] == "touch" || args[0] == "C" )
         return tree->touchArgs(args);
+    else if ( args[0] == "allfiles" || args[0] == "L" )
+        return tree->allFilesArgs(args);
     else
         return "[0] ERR: Command \"" + args[0] + "\" not recognized.\n\n";
 }
