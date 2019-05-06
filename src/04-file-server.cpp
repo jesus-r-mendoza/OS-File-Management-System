@@ -173,7 +173,7 @@ string deleteFile(int fileID) {
     }
     string line;
 
-    fstream temp;
+    ofstream temp;
     temp.open("storage/.temp.fat.dsk");
     if ( temp.fail() ) {
         return "[0] ERR: Could not access \"storage/.temp.fat.dsk\"\n\n";
@@ -194,26 +194,44 @@ string deleteFile(int fileID) {
         fat.close();
         temp.clear();
         temp.close();
+        remove("storage/.temp.fat.dsk");
         return "[0] ERR: This file doesn't exist. Cannot be deleted.\n\n";
-    } 
+    }
+    string cmdRequest = "R " + cyl + " " + sec;
+    string response = sendAndRecv(cmdRequest);
+    cout << "server resonded: " << response << endl;
+
+    if ( response[1] != '1' )
+        return "[0] ERR: The server rejected the request.\n\n";
+
+    string data = response.erase(0, 4).substr(0,128);
+    cout << data << endl;
     addAvailBlock(cyl + ',' + sec);
-    // send "R" request to disk server with cyl and sec that was gathered
-    // receive confirm notice that block exits
-    // capture string that holds the file's data
-    string data = "";
+
     parts = split(data, indicator);
+    cout << parts.size() << " ; eof ? " << parts[1] << "  of size: " << parts[1].length() << endl; 
     vector<string> nums;
     while ( parts[1] != "eof" ) {
         nums = split(parts[1], ",");
         cyl = nums[0];
         sec = nums[1];
-        // send "R" request to disk server with cyl and sec that was gathered
-        // receive confirm notice that block exits
-        // capture string that holds the file's data
-        data = ""; // whatever was received from read request
+        cmdRequest = "R " + cyl + " " + sec;
+        response = sendAndRecv(cmdRequest);
+        cout << "server resonded: " << response << endl;
+
+        if ( response[1] != '1' )
+            return "[0] ERR: The server rejected the request.\n\n";
+
+        string data = response.erase(0, 4);
         addAvailBlock(cyl + ',' + sec);
         parts = split(data, indicator);
     }
+    fat.clear();
+    fat.close();
+    temp.clear();
+    temp.close();
+    remove("storage/fat.dsk");
+    rename("storage/.temp.fat.dsk", "storage/fat.dsk");
     return "[1] Successfully delete the file. And allocated all of its blocks as free.\n\n";
 }
 
@@ -240,11 +258,13 @@ string list(string flag) {
 }
 
 int main() {
+    
     diskServerSocket = connectToDiskServer();
     if ( diskServerSocket < 0 ) {
         cout << "Failed to connect to server.\n\n";
         return -1;
     }
-    cout << createFile(12, "test.txt");
+    cout << deleteFile(12);
     close(diskServerSocket);
+    
 }
