@@ -346,6 +346,8 @@ class Tree {
     string mkdirArgs(vector<string> args) {
         if ( args.size() != 2 )
             return "[0] ERR: Command \"mkdir\" requires 1 argument.\nUsage: $ mkdir dirname/\n\n";
+        if ( args[1].find(",") > 0 )
+            return "[0] ERR: \"" + args[1] + "\" is not a valid directory name.\nUsage: $ mkdir dirname/\n\n";
         return mkdir(args[1]);
     }
 
@@ -353,6 +355,14 @@ class Tree {
         if ( args.size() != 2 )
             return "[0] ERR: Command \"rmdir\" requires 1 argument.\nUsage: $ rmdir dirname/\n\n";
         return rmdir(args[1]);
+    }
+
+    string touchArgs(vector<string> args) {        
+        if ( args.size() != 2 )
+            return "[0] ERR: Command \"mkdir\" requires 1 argument.\nUsage: $ touch filename\nUsage: $ touch filename\n\n";
+        if ( args[1].find(",") > 0 || args[1].find("/") > 0)
+            return "[0] ERR: \"" + args[1] + "\" is not a valid file name.\n\n";
+        return touch(args[1]);
     }
 
     string save() {
@@ -423,8 +433,8 @@ string parse(Tree* tree, vector<string> args) {
         return tree->mkdirArgs(args);
     else if ( args[0] == "rmdir" )
         return tree->rmdirArgs(args);
-    else if ( args[0] == "touch" )
-        return tree->touch(args[1]);
+    else if ( args[0] == "touch" || args[0] == "C" )
+        return tree->touchArgs(args);
     else
         return "[0] ERR: Command \"" + args[0] + "\" not recognized.\n\n";
 }
