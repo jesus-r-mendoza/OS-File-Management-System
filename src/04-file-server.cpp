@@ -5,13 +5,59 @@
 #include <fstream>
 #include <stdio.h>
 #include <unistd.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <sys/types.h>
 using namespace std;
 
 #define CYLINDERS 3
 #define SECTORS 8
 #define BLOCK_SIZE 128
-
+#define PORT 49000
+const string ip = "127.0.0.1";
 const string indicator = "<~/#+?$=&>";
+
+int diskServerSocket = -1;
+
+int connectToDiskServer() {
+    int sock = socket(AF_INET, SOCK_STREAM, 0);
+    if ( sock < 0 ) {
+    	cout << "ERR: socket() failed.\n";
+    	return -1;
+    }
+
+    sockaddr_in hint;
+    hint.sin_family = AF_INET;
+    hint.sin_port = htons(PORT);
+    inet_pton(AF_INET, ip.c_str(), &hint.sin_addr);
+	
+    int connectRes = connect(sock, (sockaddr*)&hint, sizeof(hint));
+    if ( connectRes < 0 ) {
+        cout << "Couldn't connect to server.\n";
+        return -1;
+    }
+	
+    cout << "\n[ Connected to server. ]\n\n";
+    return sock;
+}
+
+string sendAndRecv(string msg) {
+    int sendRes = send(diskServerSocket, msg.c_str(), msg.size() + 1, 0);
+    if ( sendRes < 0 ) {
+        return "[0] ERR: send() failed.\n";
+    }
+	char buf[256];
+    int bytesReceived = recv(diskServerSocket, buf, 256, 0);
+    if ( bytesReceived < 0 ) {
+        return "[0] ERR: recv() failed.\n";
+    } else if ( bytesReceived == 0 ) {
+		return "[0] ERR: [ Server disconnected. ]\n";
+	} else {
+        string response = string(buf, bytesReceived);
+        if ( response != "NULL" ) return response;
+    }
+}
 
 vector<string> split(string str, string regex) {
     int found;
@@ -99,10 +145,12 @@ string createFile(int fileID, string fileName) {
         writeData += '0';
     writeData += indicator + "eof";
 
-    // send() request to disk server
-    cout << writeData << endl;
-    cout << writeData.length() << endl;
-    // receive confirmation from disk server that data was written
+    string cmdRequest = "W " + coor[0] + " " + coor[1] + " " + to_string(128) + " " + writeData;
+    string response = sendAndRecv(cmdRequest);
+    cout << "server responded: " << response << endl;
+
+    if ( response[1] != '1' )
+        return "[0] ERR: The server rejected the request.\n\n";
 
     ofstream fat;
     fat.open("storage/fat.dsk", ios::app);
@@ -192,7 +240,11 @@ string list(string flag) {
 }
 
 int main() {
-    cout << reset();
-    createFile(12, "a.txt");
-    cout << list("1");
+    diskServerSocket = connectToDiskServer();
+    if ( diskServerSocket < 0 ) {
+        cout << "Failed to connect to server.\n\n";
+        return -1;
+    }
+    cout << createFile(12, "test.txt");
+    close(diskServerSocket);
 }
