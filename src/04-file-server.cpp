@@ -17,8 +17,25 @@ using namespace std;
 #define PORT 49000
 const string ip = "127.0.0.1";
 const string indicator = "<~/#+?$=&>";
+char buf[256];
 
 int diskServerSocket = -1;
+int fileServerSocket = -1;
+
+vector<string> split(string str, string regex) {
+    int found;
+    vector<string> vect;
+    string segment;
+    while ( ( found = str.find(regex) ) != -1 ) {
+        segment = str.substr(0, found);
+        str.erase(0, found + regex.length());
+        if ( segment != " " && segment.length() > 0 )
+            vect.push_back(segment);
+    }
+    if ( str.length() > 0 )
+        vect.push_back(str);
+    return vect;
+}
 
 int connectToDiskServer() {
     int sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -47,7 +64,6 @@ string sendAndRecv(string msg) {
     if ( sendRes < 0 ) {
         return "[0] ERR: send() failed.\n";
     }
-	char buf[256];
     int bytesReceived = recv(diskServerSocket, buf, 256, 0);
     if ( bytesReceived < 0 ) {
         return "[0] ERR: recv() failed.\n";
@@ -59,19 +75,43 @@ string sendAndRecv(string msg) {
     }
 }
 
-vector<string> split(string str, string regex) {
-    int found;
-    vector<string> vect;
-    string segment;
-    while ( ( found = str.find(regex) ) != -1 ) {
-        segment = str.substr(0, found);
-        str.erase(0, found + regex.length());
-        if ( segment != " " && segment.length() > 0 )
-            vect.push_back(segment);
+int getConnection() {
+    cout << "\n[ Finding new connection... ]\n";
+    int sock = socket(AF_INET, SOCK_STREAM, 0);
+    if ( sock < 0 ) {
+    	cout << "ERR: socket() failed.\n";
+    	return -1;
     }
-    if ( str.length() > 0 )
-        vect.push_back(str);
-    return vect;
+	
+    sockaddr_in hint;
+    hint.sin_family = AF_INET;
+    hint.sin_port = htons(51000);
+    inet_pton(AF_INET, "0.0.0.0", &hint.sin_addr);
+ 
+    int b = bind(sock, (sockaddr*)&hint, sizeof(hint));
+    if ( b < 0 ) {
+    	cout << "ERR: bind() failed.\n";
+    	return -1;
+    }
+    
+    int l = listen(sock, SOMAXCONN);
+    if ( l < 0 ) {
+    	cout << "ERR: listen() failed.\n";
+    	return -1;
+    }
+    
+    sockaddr_in client;
+    socklen_t clientSize = sizeof(client);
+ 
+    int clientSocket = accept(sock, (sockaddr*)&client, &clientSize);
+    
+    if ( clientSocket < 0 ) {
+    	cout << "ERR: Couldn't connect with client\n";
+    	return -1;
+    }
+    
+    close(sock);    
+    return clientSocket;
 }
 
 int blockIndex(int c, int s) {
@@ -257,6 +297,19 @@ string list(string flag) {
     return result;
 }
 
+string processArgs(vector<string> args) {
+    if ( args.size() == 0 )
+        return "NULL";
+    if ( args[0] == "C" )
+        return createFile(stoi(args[1]),args[2]);
+    else if ( args[0] == "D" )
+        return deleteFile(stoi(args[1]));
+    else if ( args[0] == "L" )
+        return list(args[1]);
+    else
+        return "ERR: Command \"" + args[0] + "\" not found. Use command \"help\" for more info.\n\n";
+}
+
 int main() {
     
     diskServerSocket = connectToDiskServer();
@@ -264,7 +317,39 @@ int main() {
         cout << "Failed to connect to server.\n\n";
         return -1;
     }
-    cout << deleteFile(12);
+
+    do {
+        if ( fileServerSocket < 0 ) {
+            fileServerSocket = getConnection();
+            if ( fileServerSocket < 0 ) continue;
+            else cout << "\n[ Connected to client. ]\n\n";
+    	}
+		
+        int bytesReceived = recv(fileServerSocket, buf, 256, 0);
+        
+        if ( bytesReceived < 0 ) {
+            cout << "ERR: recv() failed.\n";
+            continue;
+        } else if ( bytesReceived == 0 ) {
+            cout << "\n[ Client disconnected. ]\n";
+            close(fileServerSocket);
+            fileServerSocket = -1;
+            continue;
+        }
+		
+        string input = string(buf, 0, bytesReceived);
+        cout << "Client Requested: " << input << endl;
+        vector<string> arguments = split(input, " ");
+        string result = processArgs(arguments);
+        
+        int s = send(fileServerSocket, result.c_str(), result.length(), 0);
+        if ( s < 0 )
+            cout << "ERR: send() failed.\n";
+        else
+            cout << "Server Response Successful.\n";
+
+    } while(true);
+
     close(diskServerSocket);
-    
+    return 0;
 }

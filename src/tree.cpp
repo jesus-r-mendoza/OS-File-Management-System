@@ -5,9 +5,15 @@
 #include <fstream>
 #include <stdio.h>
 #include <unistd.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <sys/types.h>
 using namespace std;
 
 int count = 0;
+int fileServerSocket = -1;
+char buf[256];
 
 vector<string> split(string str, string regex) {
     int found;
@@ -22,6 +28,44 @@ vector<string> split(string str, string regex) {
     if ( str.length() > 0 )
         vect.push_back(str);
     return vect;
+}
+
+int connectToFileServer() {
+    int sock = socket(AF_INET, SOCK_STREAM, 0);
+    if ( sock < 0 ) {
+    	cout << "ERR: socket() failed.\n";
+    	return -1;
+    }
+    string ip = "127.0.0.1";
+    sockaddr_in hint;
+    hint.sin_family = AF_INET;
+    hint.sin_port = htons(51000);
+    inet_pton(AF_INET, ip.c_str(), &hint.sin_addr);
+	
+    int connectRes = connect(sock, (sockaddr*)&hint, sizeof(hint));
+    if ( connectRes < 0 ) {
+        cout << "Couldn't connect to server.\n";
+        return -1;
+    }
+	
+    cout << "\n[ Connected to server. ]\n\n";
+    return sock;
+}
+
+string sendAndRecv(string msg) {
+    int sendRes = send(fileServerSocket, msg.c_str(), msg.size() + 1, 0);
+    if ( sendRes < 0 ) {
+        return "[0] ERR: send() failed.\n";
+    }
+    int bytesReceived = recv(fileServerSocket, buf, 256, 0);
+    if ( bytesReceived < 0 ) {
+        return "[0] ERR: recv() failed.\n";
+    } else if ( bytesReceived == 0 ) {
+		return "[0] ERR: [ Server disconnected. ]\n";
+	} else {
+        string response = string(buf, bytesReceived);
+        if ( response != "NULL" ) return response;
+    }
 }
 
 class Node {
@@ -227,6 +271,34 @@ class Tree {
             return "[0] ERR: Couldn't delete directory \"" + subdir + "\".\nUsage: $ rmdir dirname/";
     }
 
+    string touch(string fileName) {
+        if ( fileName.length() <= 0 || fileName[fileName.length()-1] == '/' )
+            return "[0] ERR: \"" + fileName + "\" is not a valid file name.\nUsage: $ touch filename\n\n";
+        vector<string> longPath = split(fileName, "/");
+        int result;
+        if ( longPath.size() == 1 ) {
+            Node* dir = new Node(longPath[0]);
+            result = current->addChild(dir);
+            if ( result == -2 )
+                return "[0] ERR: Couldn't create file.\nUsage: $ touch filename\n\n";
+            else if ( result == -1 )
+                return "[0] ERR: File already exits.\nUsage: $ touch filename\n\n";
+            string cmdRequest = "C " + to_string(dir->id) + " " + longPath[0];
+            string response = sendAndRecv(cmdRequest);
+            if ( response[1] != '1' )
+                return response;
+            return "[1] Successfully created file.\n\n";
+        }
+        string dir = "";
+        for ( int i = 0; i < longPath.size()-1; i++ )
+            dir += longPath[i] + '/';
+        string res = cd(dir);
+        if ( res[1] == '1' )
+            return touch(longPath[longPath.size()-1]);
+        else
+            return "[0] ERR: Couldn't create file \"" + fileName + "\".\nUsage: $ touch filename";
+    }
+
     Node* dfs(string node) {
         if ( root->name == node )
             return root;
@@ -351,6 +423,8 @@ string parse(Tree* tree, vector<string> args) {
         return tree->mkdirArgs(args);
     else if ( args[0] == "rmdir" )
         return tree->rmdirArgs(args);
+    else if ( args[0] == "touch" )
+        return tree->touch(args[1]);
     else
         return "[0] ERR: Command \"" + args[0] + "\" not recognized.\n\n";
 }
@@ -369,7 +443,11 @@ bool prompt(Tree* tree) {
 }
 
 int main() {
-
+    fileServerSocket = connectToFileServer();
+    if ( fileServerSocket < 0 ) {
+        cout << "Failed to connect to server.\n\n";
+        return -1;
+    }
     Tree* tree = load();
     bool quit = false;
     while(!quit)
