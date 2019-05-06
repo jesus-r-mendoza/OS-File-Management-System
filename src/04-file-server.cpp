@@ -92,27 +92,15 @@ string createFile(int fileID, string fileName) {
     cout << writeData.length() << endl;
     // receive confirmation from disk server that data was written
 
-    ifstream fat;
-    fat.open("storage/fat.dsk");
+    ofstream fat;
+    fat.open("storage/fat.dsk", ios::app);
     if ( fat.fail() ) {
         return "[0] ERR: Could not access \"storage/fat.dsk\"\n\n";
     }
-    ofstream temp;
-    temp.open("storage/.temp.fat.dsk");
-    if ( temp.fail() ) {
-        return "[0] ERR: Could not access \"storage/.temp.fat.dsk\"\n\n";
-    }
-    string line;
-    while ( getline(fat, line) )
-        temp << line + '\n';
     int block = blockIndex(stoi(coor[0]), stoi(coor[1]));
-    temp << fileID << ',' << fileName << ",1," << to_string(block) << ',' << avail << '\n';
+    fat << fileID << ',' << fileName << ",1," << to_string(block) << ',' << avail << '\n';
     fat.clear();
     fat.close();
-    temp.clear();
-    temp.close();
-    remove("storage/fat.dsk");
-    rename("storage/.temp.fat.dsk", "storage/fat.dsk");
 }
 
 int main() {
