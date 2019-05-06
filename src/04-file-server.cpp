@@ -118,22 +118,6 @@ int blockIndex(int c, int s) {
     return ( c * SECTORS ) + s;
 }
 
-string reset() {
-    ofstream freeBlocks;
-    freeBlocks.open("storage/free-blocks.dsk");
-    if ( freeBlocks.fail() ) {
-        return "[0] ERR: Could not access \"storage/free-blocks.dsk\"\n\n";
-    }
-    for ( int c = 0; c < CYLINDERS; c++ ) {
-        for ( int s = 0; s < SECTORS; s++ ) {
-            freeBlocks << to_string(c) << ',' << to_string(s) << '\n';
-        }
-    }
-    freeBlocks.clear();
-    freeBlocks.close();
-    return "[1] Successfully clean free-blocks.dsk\n\n";
-}
-
 string getAvailBlock() {
     ifstream freeBlocks;
     freeBlocks.open("storage/free-blocks.dsk");
