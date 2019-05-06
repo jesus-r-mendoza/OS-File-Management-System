@@ -23,7 +23,7 @@ $ ./server <PORT>
 
 $ ./client <IP> <PORT> <STRING>
 
-	<IP>     = The IP address of localhost, use "0.0.0."
+	<IP>     = The IP address of localhost, use "0.0.0.0"
 	<PORT>   = The Port # you used to start the server
 	<STRING> = The input string that will be sent to the server, then reversed by the server
 	
