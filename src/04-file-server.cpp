@@ -11,10 +11,11 @@
 #include <sys/types.h>
 using namespace std;
 
-#define CYLINDERS 3
-#define SECTORS 8
+#define CYLINDERS 20
+#define SECTORS 20
 #define BLOCK_SIZE 128
 #define PORT 49000
+
 const string ip = "127.0.0.1";
 const string indicator = "<~/#+?$=&>";
 char buf[256];

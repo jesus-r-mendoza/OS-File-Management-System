@@ -11,8 +11,8 @@
 #include <sys/types.h>
 using namespace std;
 
-#define CYLINDERS 3
-#define SECTORS 8
+#define CYLINDERS 20
+#define SECTORS 20
 #define BLOCK_SIZE 128
 
 vector<string> split(string str, string regex) {
