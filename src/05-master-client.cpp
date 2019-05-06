@@ -457,6 +457,8 @@ bool prompt(Tree* tree) {
     vector<string> args = split(input, " ");
     if ( args.size() > 0 && args[0] == "exit" ) {
         tree->save();
+        close(fileServerSocket);
+        cout << "\nExiting...\nBye\n\n";
         return true;
     }
     cout << parse(tree, args);
@@ -466,7 +468,6 @@ bool prompt(Tree* tree) {
 int main() {
     fileServerSocket = connectToFileServer();
     if ( fileServerSocket < 0 ) {
-        cout << "Failed to connect to server.\n\n";
         return -1;
     }
     Tree* tree = load();

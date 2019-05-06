@@ -298,12 +298,11 @@ int main() {
     
     diskServerSocket = connectToDiskServer();
     if ( diskServerSocket < 0 ) {
-        cout << "Failed to connect to server.\n\n";
         return -1;
     }
     int fails = 0;
     do {
-        if ( fails > 15 ) {
+        if ( fails > 25 ) {
             cout << "\nToo many connection fails. Terminating.\n\n";
             break;
         }

@@ -196,7 +196,7 @@ int main() {
     int client = -1;
     int fails = 0;
     do {
-        if ( fails > 15 ) {
+        if ( fails > 25 ) {
             cout << "\nToo many connection fails. Terminating.\n\n";
             break;
         }
